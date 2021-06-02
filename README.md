@@ -18,6 +18,13 @@ This repo provides guideline for building and testing OpenTelemetry.
 1. Change the docker image tag using: `docker tag otelcontribcol:latest rhossai2/otel-contrib:v0.0.0` where `rhossai2` is your docker-hub user name.
 1. Push the image to docker-hub running: `docker push rhossai2/otel-contrib:v0.0.0`
 
+Command for otel-collector-contrib image:
+```yaml
+- command:
+    - "/otelcontribcol"
+    - "--config=/conf/adot-collector-config.yaml"
+    - "--log-level=DEBUG"
+```
 
 ### Build and run from the OpenTelemetry Collector repo
 1. Clone the [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) repo.
