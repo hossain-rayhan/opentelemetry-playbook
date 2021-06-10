@@ -9,6 +9,9 @@ This repo provides guideline for building and testing OpenTelemetry.
 1. To build the collector run: `make otelcontribcol`
 1. Add a config file in the main repo: `test_config.yaml`
 1. Run the collector with your config file: `bin/otelcontribcol_darwin_amd64 --config test_config.yaml`
+1. Before running unit test for a component, move inside the folder, e.g.: `cd processor/metricsgenerationprocessor/`
+1. To run unit test: `go test -v ./... -cover -coverprofile mytest.out`
+1. To see coverage of unit test: `go tool cover -html=mytest.out`
 
 ### Build docker image from the OpenTelemetry Collector Contrib repo
 1. Clone the [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) repo.
