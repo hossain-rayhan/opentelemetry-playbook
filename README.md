@@ -38,3 +38,13 @@ Command for otel-collector-contrib image:
 1. Before running unit test for a component, move inside the folder, e.g.: `cd processor/metricsgenerationprocessor/`
 1. To run unit test: `go test -v ./... -cover -coverprofile mytest.out`
 1. To see coverage of unit test: `go tool cover -html=mytest.out`
+
+### Build docker image from ADOT Collector repo
+
+Command for running ADOT Collector:
+```yaml
+- command:
+          - "/awscollector"
+          - "--config=/conf/adot-collector-config.yaml"
+          - "--log-level=DEBUG"
+```
