@@ -48,3 +48,5 @@ Command for running ADOT Collector:
           - "--config=/conf/adot-collector-config.yaml"
           - "--log-level=DEBUG"
 ```
+
+### Add new component (receiver/processor) in the OpenTelemetry Collector Contrib repo
