@@ -17,3 +17,29 @@ Replace or delete:
 **Get raw metrics from Kubelets cAdvisor endpoint:**
 
 `kubectl get --raw "/api/v1/nodes/fargate-ip-192-168-137-185.us-east-2.compute.internal/proxy/metrics/cadvisor"`
+
+## Regexp matching rules
+**Empty-String:** `^$` or `^\\s$`
+
+]If you need to check if a string contains only whitespaces, you can use `^\s*$`. Note that `\s` is the shorthand for the whitespace character class.
+
+**Non-empty or Non-blank String:** `(.|\\s)*\\S(.|\\s)*`
+
+This matches any string containing at least one non-whitespace character (the `\S` in the middle). It can be preceded and followed by anything, any character or whitespace sequence (including new lines): `(.|\s)*.`
+
+N.B.: If you use raw string in go_test.go code then use single back slash, 
+```
+regexp.MustCompile(`(.|\s)*\S(.|\s)*`)
+```
+
+```yaml
+-   include: MemoryUtilized
+    action: insert
+    new_name: MemoryUtilizedNew
+    match_type: regexp
+    match_labels: {"Type": "(.|\\s)*\\S(.|\\s)*", "container": "^$"} 
+    operations:
+        - action: add_label
+          new_label: NewLabel
+          new_value: Generated
+```
