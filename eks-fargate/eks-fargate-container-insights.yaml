@@ -3,19 +3,19 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: adot-col3
+  name: eks-fargate-container-insights
   labels:
-    name: adot-col3
+    name: eks-fargate-container-insights
 
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: adot-collector-conf
-  namespace: adot-col3
+  name: adot-collector-config
+  namespace: eks-fargate-container-insights
   labels:
     app: aws-adot
-    component: adot-collector-conf
+    component: adot-collector-config
 data:
   adot-collector-config: |
     receivers:
@@ -465,7 +465,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: amp-iamproxy-ingest-service-account
-  namespace: adot-col3
+  namespace: eks-fargate-container-insights
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::803860917211:role/amp-iamproxy-ingest-role
 
@@ -501,7 +501,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: amp-iamproxy-ingest-service-account
-    namespace: adot-col3
+    namespace: eks-fargate-container-insights
 roleRef:
   kind: ClusterRole
   name: adotcol-admin-role
@@ -512,7 +512,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: adot-collector
-  namespace: adot-col3
+  namespace: eks-fargate-container-insights
   labels:
     app: aws-adot
     component: adot-collector
@@ -528,7 +528,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: adot-collector
-  namespace: adot-col3
+  namespace: eks-fargate-container-insights
   labels:
     app: aws-adot
     component: adot-collector
@@ -607,7 +607,7 @@ spec:
             port: 13133 # Health Check extension default port.
       volumes:
         - configMap:
-            name: adot-collector-conf
+            name: adot-collector-config
             items:
               - key: adot-collector-config
                 path: adot-collector-config.yaml
