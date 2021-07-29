@@ -3,16 +3,16 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: eks-fargate-container-insights
+  name: fargate-container-insights
   labels:
-    name: eks-fargate-container-insights
+    name: fargate-container-insights
 
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: adot-collector-config
-  namespace: eks-fargate-container-insights
+  namespace: fargate-container-insights
   labels:
     app: aws-adot
     component: adot-collector-config
@@ -26,7 +26,7 @@ data:
             scrape_timeout: 50s
 
           scrape_configs:
-          - job_name: 'kubernetes-cadvisor'
+          - job_name: 'kubelets-cadvisor-metrics'
             sample_limit: 10000
             scheme: https
             # metrics_path: /metrics/cadvisor
@@ -427,9 +427,9 @@ data:
       batch:
     exporters:
       awsemf:
-        log_group_name: '/aws/containerinsights/texas/performance'
-        log_stream_name: 'container-insights-demo-july-08-07'
-        namespace: 'ContainerInsights'
+        log_group_name: '/aws/containerinsights/texas/performance/july27'
+        log_stream_name: 'container-insights-demo-july-27-01'
+        namespace: 'ContainerInsights-july-27-01'
         dimension_rollup_option: 1
         region: us-east-2
         resource_to_telemetry_conversion:
@@ -464,8 +464,8 @@ data:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: amp-iamproxy-ingest-service-account
-  namespace: eks-fargate-container-insights
+  name: adot-collector-service-account
+  namespace: fargate-container-insights
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::803860917211:role/amp-iamproxy-ingest-role
 
@@ -500,8 +500,8 @@ metadata:
   name: adotcol-admin-role-binding
 subjects:
   - kind: ServiceAccount
-    name: amp-iamproxy-ingest-service-account
-    namespace: eks-fargate-container-insights
+    name: adot-collector-service-account
+    namespace: fargate-container-insights
 roleRef:
   kind: ClusterRole
   name: adotcol-admin-role
@@ -511,8 +511,8 @@ roleRef:
 apiVersion: v1
 kind: Service
 metadata:
-  name: adot-collector
-  namespace: eks-fargate-container-insights
+  name: app-service-cluster-ip
+  namespace: fargate-container-insights
   labels:
     app: aws-adot
     component: adot-collector
@@ -522,13 +522,13 @@ spec:
     port: 8888
   selector:
     component: adot-collector
-  type: NodePort
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: adot-collector
-  namespace: eks-fargate-container-insights
+  namespace: fargate-container-insights
   labels:
     app: aws-adot
     component: adot-collector
@@ -545,7 +545,7 @@ spec:
         app: aws-adot
         component: adot-collector
     spec:
-      serviceAccountName: amp-iamproxy-ingest-service-account
+      serviceAccountName: adot-collector-service-account
       securityContext:
         fsGroup: 65534
       containers:
@@ -569,6 +569,8 @@ spec:
         env:
           - name: AWS_REGION
             value: "us-east-2"
+          - name: CLUSTER
+            value: "texas"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
