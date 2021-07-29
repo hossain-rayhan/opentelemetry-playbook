@@ -51,3 +51,33 @@ It depends on the what you are using to run containers. In kubernetes, `containe
 If you wanted to know the percentage of cpu a container was using, you should be able to do something like `container_cpu_usage_seconds_total`/`container_spec_cpu_quota` * `some constant`. 
 
 https://github.com/google/cadvisor/issues/2026#issuecomment-415571557
+
+
+**Kubernetes Service commands**
+
+Kubectl Service Commands:
+```
+a483e7119b0b:Desktop hrayhan$ kubectl get svc -A
+NAMESPACE                    NAME                     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+adot-col3                    adot-collector           NodePort    10.100.213.232   <none>        8888:30522/TCP   19d
+default                      kubernetes               ClusterIP   10.100.0.1       <none>        443/TCP          119d
+fargate-container-insights   app-service-cluster-ip   ClusterIP   10.100.67.232    <none>        8888/TCP         2m4s
+kube-system                  kube-dns                 ClusterIP   10.100.0.10      <none>        53/UDP,53/TCP    119d
+monitoring                   fluent-bit               ClusterIP   None             <none>        2020/TCP         85d
+```
+
+```
+a483e7119b0b:Desktop hrayhan$ kubectl get ep app-service-cluster-ip -n fargate-container-insights
+NAME                     ENDPOINTS             AGE
+app-service-cluster-ip   192.168.144.65:8888   3m47s
+```
+
+```
+a483e7119b0b:Desktop hrayhan$ kubectl get services -o=wide -A
+NAMESPACE                    NAME                     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE    SELECTOR
+adot-col3                    adot-collector           NodePort    10.100.213.232   <none>        8888:30522/TCP   19d    component=adot-collector
+default                      kubernetes               ClusterIP   10.100.0.1       <none>        443/TCP          119d   <none>
+fargate-container-insights   app-service-cluster-ip   ClusterIP   10.100.67.232    <none>        8888/TCP         11m    component=adot-collector
+kube-system                  kube-dns                 ClusterIP   10.100.0.10      <none>        53/UDP,53/TCP    119d   k8s-app=kube-dns
+monitoring                   fluent-bit               ClusterIP   None             <none>        2020/TCP         85d    k8s-app=fluent-bit
+```
