@@ -45,6 +45,7 @@ regexp.MustCompile(`(.|\s)*\S(.|\s)*`)
 ```
 
 **Understanding CPU limit and Request**
+
 It depends on the what you are using to run containers. In kubernetes, `container_spec_cpu_quota` maps to container limits, and `container_spec_cpu_shares` is based on container requests.
 
 If you wanted to know the percentage of cpu a container was using, you should be able to do something like `container_cpu_usage_seconds_total`/`container_spec_cpu_quota` * `some constant`. 
