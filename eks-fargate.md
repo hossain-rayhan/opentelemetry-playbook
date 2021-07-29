@@ -81,3 +81,16 @@ fargate-container-insights   app-service-cluster-ip   ClusterIP   10.100.67.232 
 kube-system                  kube-dns                 ClusterIP   10.100.0.10      <none>        53/UDP,53/TCP    119d   k8s-app=kube-dns
 monitoring                   fluent-bit               ClusterIP   None             <none>        2020/TCP         85d    k8s-app=fluent-bit
 ```
+
+```
+a483e7119b0b:Desktop hrayhan$ kubectl get pods --selector=component=adot-collector -o=name -A
+pod/adot-collector-0
+pod/adot-collector-0
+```
+
+```
+a483e7119b0b:Desktop hrayhan$ kubectl get pods --selector=component=adot-collector -o=wide -A
+NAMESPACE                    NAME               READY   STATUS    RESTARTS   AGE   IP                NODE                                                    NOMINATED NODE   READINESS GATES
+adot-col3                    adot-collector-0   2/2     Running   0          19d   192.168.148.227   fargate-ip-192-168-148-227.us-east-2.compute.internal   <none>           <none>
+fargate-container-insights   adot-collector-0   2/2     Running   0          13m   192.168.144.65    fargate-ip-192-168-144-65.us-east-2.compute.internal    <none>           <none>
+```
