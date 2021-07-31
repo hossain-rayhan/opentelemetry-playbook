@@ -1,6 +1,6 @@
 # AWS ECS Container Metrics Receiver
 
-## Test with local josn payload
+## Test with local JSON payload
 This receiver reads task metadata and resource usage stats from ECS Task Metadata Endpoint. However, for local testing, we can use test payload which are available in the code directory. We can modify the `rest_client.go` file to use our local json payload instead of calling the real ECS Task Metadata Endpoint. 
 
 **Modify the EndpointResponse() function in rest_client.go file**
