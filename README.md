@@ -50,3 +50,7 @@ Command for running ADOT Collector:
 ```
 
 ### Add new component (receiver/processor) in the OpenTelemetry Collector Contrib repo
+
+We need to make changes in two different files to enable a components (receiver/processor). 
+1. Update the `go.mod` file.
+1. Update default component file.
