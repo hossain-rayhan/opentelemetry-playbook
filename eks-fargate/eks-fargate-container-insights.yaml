@@ -44,11 +44,13 @@ data:
                 # Only for Kubernetes ^1.7.3.
                 # See: https://github.com/prometheus/prometheus/issues/2916
               - target_label: __address__
+                # Changes the address to Kube API servers default address and port
                 # replacement: kubernetes.default.svc.cluster.local:443
                 replacement: kubernetes.default.svc:443
               - source_labels: [__meta_kubernetes_node_name]
                 regex: (.+)
                 target_label: __metrics_path__
+                # Changes the default metrics path to kubelet's cadvdisor metrics endpoint proxy
                 replacement: /api/v1/nodes/$${1}/proxy/metrics/cadvisor
             metric_relabel_configs:
               - action: replace
