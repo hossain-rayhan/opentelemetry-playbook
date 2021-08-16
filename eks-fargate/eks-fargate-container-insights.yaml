@@ -458,7 +458,6 @@ data:
       pipelines:
         metrics:
           receivers: [prometheus]
-          # processors: [metricstransform]
           processors: [resourcedetection, metricstransform/insights, filter, cumulativetodelta, experimental_metricsgeneration, experimental_metricsgeneration/2, experimental_metricsgeneration/3, metricstransform/labelling, batch/metrics]
           exporters: [logging, awsemf]
 ---
