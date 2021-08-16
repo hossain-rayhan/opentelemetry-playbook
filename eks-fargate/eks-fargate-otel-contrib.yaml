@@ -432,7 +432,7 @@ data:
         region: us-east-2
         resource_to_telemetry_conversion:
           enabled: true
-        create_eks_fargate_kubernetes_object: true
+        eks_fargate_container_insights_enabled: true
         parse_json_encoded_attr_values: ["kubernetes"]
         dimension_rollup_option: NoDimensionRollup
         metric_declarations:
