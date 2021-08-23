@@ -9,6 +9,51 @@ metadata:
     name: fargate-container-insights
 
 ---
+# create adot-collector service account and role binding
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: adot-collector-service-account
+  namespace: fargate-container-insights
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::803860917211:role/amp-iamproxy-ingest-role
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: adotcol-admin-role
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/proxy
+      - nodes/metrics
+      - services
+      - endpoints
+      - pods
+      - pods/proxy
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: [ "/metrics/cadvisor"]
+    verbs: ["get", "list", "watch"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: adotcol-admin-role-binding
+subjects:
+  - kind: ServiceAccount
+    name: adot-collector-service-account
+    namespace: fargate-container-insights
+roleRef:
+  kind: ClusterRole
+  name: adotcol-admin-role
+  apiGroup: rbac.authorization.k8s.io
+
+# collector configuration section
+# update `ClusterName=my-cluster-name` in the env var OTEL_RESOURCE_ATTRIBUTES
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -391,9 +436,6 @@ data:
             match_type: regexp
             action: update
             operations:
-              - action: add_label
-                new_label: ClusterName
-                new_value: texas
               - action: update_label
                 label: namespace
                 new_label: Namespace
@@ -420,9 +462,9 @@ data:
         timeout: 60s
     exporters:
       awsemf:
-        log_group_name: '/aws/containerinsights/{ClusterName}/performance/test-aug-22-01'
-        log_stream_name: '{PodName}-aug-22-03'
-        namespace: 'ContainerInsights-aug-22-01'
+        log_group_name: '/aws/containerinsights/{ClusterName}/performance/test-aug-22-02'
+        log_stream_name: '{PodName}-aug-22-02'
+        namespace: 'ContainerInsights-aug-22-02'
         region: us-east-2
         resource_to_telemetry_conversion:
           enabled: true
@@ -447,70 +489,24 @@ data:
           # processors: [resourcedetection, metricstransform/insights, filter, cumulativetodelta, experimental_metricsgeneration, experimental_metricsgeneration/2, experimental_metricsgeneration/3, metricstransform/labelling, batch]
           exporters: [logging, awsemf]  
       extensions: [health_check]
----
-# create adot-col service account and role binding
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: adot-collector-service-account
-  namespace: fargate-container-insights
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::803860917211:role/amp-iamproxy-ingest-role
-
----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: adotcol-admin-role
-rules:
-  - apiGroups: [""]
-    resources:
-    - nodes
-    - nodes/proxy
-    - nodes/metrics
-    - services
-    - endpoints
-    - pods
-    - pods/proxy
-    verbs: ["get", "list", "watch"]
-  - apiGroups:
-    - extensions
-    resources:
-    - ingresses
-    verbs: ["get", "list", "watch"]
-  - nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
-    verbs: ["get", "list", "watch"]
-
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: adotcol-admin-role-binding
-subjects:
-  - kind: ServiceAccount
-    name: adot-collector-service-account
-    namespace: fargate-container-insights
-roleRef:
-  kind: ClusterRole
-  name: adotcol-admin-role
-  apiGroup: rbac.authorization.k8s.io
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: app-service-cluster-ip
+  name: adot-collector-service
   namespace: fargate-container-insights
   labels:
     app: aws-adot
     component: adot-collector
 spec:
   ports:
-  - name: metrics # Default endpoint for querying metrics.
+  - name: metrics # default endpoint for querying metrics.
     port: 8888
   selector:
     component: adot-collector
   type: ClusterIP
+
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -525,8 +521,7 @@ spec:
     matchLabels:
       app: aws-adot
       component: adot-collector
-  #minReadySeconds: 5
-  serviceName: adot-collector
+  serviceName: adot-collector-service
   template:
     metadata:
       labels:
@@ -539,6 +534,7 @@ spec:
       containers:
       - image: rhossai2/otel-contrib:v0.0.13
         name: adot-collector
+        imagePullPolicy: Always
         command:
           - "/otelcontribcol"
           - "--config=/conf/adot-collector-config.yaml"
@@ -546,22 +542,6 @@ spec:
         env:
           - name: OTEL_RESOURCE_ATTRIBUTES
             value: "ClusterName=texas"
-          - name: K8S_NODE_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          - name: HOST_IP
-            valueFrom:
-              fieldRef:
-                fieldPath: status.hostIP
-          - name: HOST_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          - name: K8S_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
         resources:
           limits:
             cpu: 2
@@ -569,19 +549,9 @@ spec:
           requests:
             cpu: 200m
             memory: 400Mi
-        ports:
-        - containerPort: 8888  # Default endpoint for querying metrics.
         volumeMounts:
-        - name: adot-collector-config-volume
-          mountPath: /conf
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 13133 # Health Check extension default port.
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 13133 # Health Check extension default port.
+          - name: adot-collector-config-volume
+            mountPath: /conf
       volumes:
         - configMap:
             name: adot-collector-config
