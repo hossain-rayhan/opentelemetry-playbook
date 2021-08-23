@@ -130,203 +130,203 @@ data:
             new_name: new_container_cpu_limit
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_spec_cpu_shares
             new_name: new_container_cpu_request
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_cpu_usage_seconds_total
             new_name: new_container_cpu_usage_seconds_total
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_spec_memory_limit_bytes
             new_name: new_container_memory_limit
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_cache
             new_name: new_container_memory_cache
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_max_usage_bytes
             new_name: new_container_memory_max_usage
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_usage_bytes
             new_name: new_container_memory_usage
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_working_set_bytes
             new_name: new_container_memory_working_set
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_rss
             new_name: new_container_memory_rss
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_swap
             new_name: new_container_memory_swap
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_failcnt
             new_name: new_container_memory_failcnt
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_failures_total
             new_name: new_container_memory_hierarchical_pgfault
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "failure_type": "pgfault", "scope": "hierarchy"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate", "failure_type": "pgfault", "scope": "hierarchy"}
           - include: container_memory_failures_total
             new_name: new_container_memory_hierarchical_pgmajfault
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "failure_type": "pgmajfault", "scope": "hierarchy"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate", "failure_type": "pgmajfault", "scope": "hierarchy"}
           - include: container_memory_failures_total
             new_name: new_container_memory_pgfault
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "failure_type": "pgfault", "scope": "container"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate", "failure_type": "pgfault", "scope": "container"}
           - include: container_memory_failures_total
             new_name: new_container_memory_pgmajfault
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "failure_type": "pgmajfault", "scope": "container"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate", "failure_type": "pgmajfault", "scope": "container"}
           - include: container_fs_limit_bytes
             new_name: new_container_filesystem_capacity
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_fs_usage_bytes
             new_name: new_container_filesystem_usage
             action: insert
             match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           # POD LEVEL METRICS
           - include: container_spec_cpu_quota
             new_name: pod_cpu_limit
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_spec_cpu_shares
             new_name: pod_cpu_request
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_cpu_usage_seconds_total
             new_name: pod_cpu_usage_seconds_total
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_spec_memory_limit_bytes
             new_name: pod_memory_limit
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_cache
             new_name: pod_memory_cache
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_max_usage_bytes
             new_name: pod_memory_max_usage
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_usage_bytes
             new_name: pod_memory_usage
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_working_set_bytes
             new_name: pod_memory_working_set
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_rss
             new_name: pod_memory_rss
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_swap
             new_name: pod_memory_swap
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_failcnt
             new_name: pod_memory_failcnt
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_memory_failures_total
             new_name: pod_memory_hierarchical_pgfault
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "failure_type": "pgfault", "scope": "hierarchy"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate", "failure_type": "pgfault", "scope": "hierarchy"}
           - include: container_memory_failures_total
             new_name: pod_memory_hierarchical_pgmajfault
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "failure_type": "pgmajfault", "scope": "hierarchy"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate", "failure_type": "pgmajfault", "scope": "hierarchy"}
           - include: container_memory_failures_total
             new_name: pod_memory_pgfault
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "failure_type": "pgfault", "scope": "container"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate", "failure_type": "pgfault", "scope": "container"}
           - include: container_memory_failures_total
             new_name: pod_memory_pgmajfault
             action: insert
             match_type: regexp
-            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "failure_type": "pgmajfault", "scope": "container"}
+            experimental_match_labels: {"image": "^$", "container": "^$", "pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate", "failure_type": "pgmajfault", "scope": "container"}
           - include: container_network_receive_bytes_total
             new_name: pod_network_rx_bytes
             action: insert
             match_type: regexp
-            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_network_receive_packets_dropped_total
             new_name: pod_network_rx_dropped
             action: insert
             match_type: regexp
-            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_network_receive_errors_total
             new_name: pod_network_rx_errors
             action: insert
             match_type: regexp
-            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_network_receive_packets_total
             new_name: pod_network_rx_packets
             action: insert
             match_type: regexp
-            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_network_transmit_bytes_total
             new_name: pod_network_tx_bytes
             action: insert
             match_type: regexp
-            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_network_transmit_packets_dropped_total
             new_name: pod_network_tx_dropped
             action: insert
             match_type: regexp
-            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_network_transmit_errors_total
             new_name: pod_network_tx_errors
             action: insert
             match_type: regexp
-            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           - include: container_network_transmit_packets_total
             new_name: pod_network_tx_packets
             action: insert
             match_type: regexp
-            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*"}
+            experimental_match_labels: {"pod": "(.|\\s)*\\S(.|\\s)*", "LaunchType": "fargate"}
           # NODE LEVEL METRICS  
           - include: container_spec_cpu_shares
             new_name: node_cpu_limit
@@ -478,7 +478,7 @@ data:
     exporters:
       awsemf:
         log_group_name: '/aws/containerinsights/{ClusterName}/performance/test-aug-22-02'
-        log_stream_name: '{PodName}-aug-22-03'
+        log_stream_name: '{PodName}-aug-22-04'
         namespace: 'ContainerInsights-aug-22-02'
         region: us-east-2
         resource_to_telemetry_conversion:
