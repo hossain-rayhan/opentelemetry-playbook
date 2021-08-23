@@ -49,9 +49,20 @@ data:
               - source_labels: [__meta_kubernetes_node_name]
                 regex: (.+)
                 target_label: __metrics_path__
-                # Changes the default metrics path to kubelet's proxy cadvdisor metrics endpoint 
+                # Changes the default metrics path to kubelet's proxy cadvdisor metrics endpoint
                 replacement: /api/v1/nodes/$${1}/proxy/metrics/cadvisor
-
+            metric_relabel_configs:
+              # extract readable container/pod name from id field
+              - action: replace
+                source_labels: [id]
+                regex: '^/machine\.slice/machine-rkt\\x2d([^\\]+)\\.+/([^/]+)\.service$'
+                target_label: rkt_container_name
+                replacement: '$${2}-$${1}'
+              - action: replace
+                source_labels: [id]
+                regex: '^/system\.slice/(.+)\.service$'
+                target_label: systemd_service_name
+                replacement: '$${1}'
     processors:
       batch:
         timeout: 60s
