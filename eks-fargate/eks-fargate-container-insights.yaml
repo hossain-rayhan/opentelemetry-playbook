@@ -500,7 +500,7 @@ data:
       pipelines:
         metrics:
           receivers: [prometheus]
-          processors: [metricstransform/labelling_1, resourcedetection, metricstransform_rename, filter, metricstransform/labelling_2, batch]
+          processors: [metricstransform/labelling_1, resourcedetection, metricstransform/rename, filter, metricstransform/labelling_2, batch]
           # processors: [resourcedetection, metricstransform/insights, filter, cumulativetodelta, experimental_metricsgeneration, experimental_metricsgeneration/2, experimental_metricsgeneration/3, metricstransform/labelling, batch]
           exporters: [logging, awsemf]  
       extensions: [health_check]
