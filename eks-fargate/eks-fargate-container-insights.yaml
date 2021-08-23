@@ -1,5 +1,6 @@
 ---
-# create adot-col namespace
+# create fargate-container-insights namespace
+# make sure you have a fargate profile created with the same name `fargate-container-insights`
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -29,7 +30,6 @@ data:
           - job_name: 'kubelets-cadvisor-metrics'
             sample_limit: 10000
             scheme: https
-            # metrics_path: /metrics/cadvisor
   
             kubernetes_sd_configs:
             - role: node
@@ -44,35 +44,17 @@ data:
                 # Only for Kubernetes ^1.7.3.
                 # See: https://github.com/prometheus/prometheus/issues/2916
               - target_label: __address__
-                # Changes the address to Kube API servers default address and port
-                # replacement: kubernetes.default.svc.cluster.local:443
+                # Changes the address to Kube API server's default address and port
                 replacement: kubernetes.default.svc:443
               - source_labels: [__meta_kubernetes_node_name]
                 regex: (.+)
                 target_label: __metrics_path__
-                # Changes the default metrics path to kubelet's cadvdisor metrics endpoint proxy
+                # Changes the default metrics path to kubelet's proxy cadvdisor metrics endpoint 
                 replacement: /api/v1/nodes/$${1}/proxy/metrics/cadvisor
-            metric_relabel_configs:
-              - action: replace
-                source_labels: [id]
-                regex: '^/machine\.slice/machine-rkt\\x2d([^\\]+)\\.+/([^/]+)\.service$'
-                target_label: rkt_container_name
-                replacement: '$${2}-$${1}'
-              - action: replace
-                source_labels: [id]
-                regex: '^/system\.slice/(.+)\.service$'
-                target_label: systemd_service_name
-                replacement: '$${1}'
+
     processors:
-      batch/metrics:
+      batch:
         timeout: 60s
-      filter/strict:
-        metrics:
-          include:
-            match_type: strict
-            metric_names:
-              - container_spec_cpu_quota
-              - container_spec_memory_limit_bytes
       filter:
         metrics:
           include:
@@ -81,14 +63,9 @@ data:
               - new_container_.*
               - pod_.*
               - node_.*
+              - service_*
+              - namespace_*
       metricstransform:
-        transforms:
-          - include: container_spec_cpu_quota
-            new_name: new_container_cpu_limit
-            action: insert
-            match_type: regexp
-            experimental_match_labels: {"container": "(.|\\s)*\\S(.|\\s)*"}
-      metricstransform/insights:
         transforms:
           - include: container_spec_cpu_quota
             new_name: new_container_cpu_limit
@@ -303,7 +280,7 @@ data:
             match_type: strict
             experimental_match_labels: {"id": "/"}
       resourcedetection:
-        detectors: [eks]
+        detectors: [env, eks]
       cumulativetodelta:
         metrics:
           - new_container_cpu_usage_seconds_total
@@ -426,13 +403,11 @@ data:
             match_type: regexp
             action: update
             new_name: container_$$1
-      batch:
     exporters:
       awsemf:
-        log_group_name: '/aws/containerinsights/texas/performance/july27'
-        log_stream_name: 'container-insights-demo-july-27-01'
-        namespace: 'ContainerInsights-july-27-01'
-        dimension_rollup_option: 1
+        log_group_name: '/aws/containerinsights/{ClusterName}/performance/test-aug-22-01'
+        log_stream_name: '{PodName}-aug-22-03'
+        namespace: 'ContainerInsights-aug-22-01'
         region: us-east-2
         resource_to_telemetry_conversion:
           enabled: true
@@ -440,9 +415,9 @@ data:
         parse_json_encoded_attr_values: ["kubernetes"]
         dimension_rollup_option: NoDimensionRollup
         metric_declarations:
-          - dimensions: [ [ ClusterName ], [ ClusterName, Namespace ], [ ClusterName, Namespace,  PodName] ]
+          - dimensions: [ [ ClusterName ], [ ClusterName, Namespace ], [ ClusterName, Namespace,  PodName], [ ClusterName, Namespace,  Service] ]
             metric_name_selectors: [ pod.* ]
-          - metric_name_selectors: [ container.* ]
+          - metric_name_selectors: [ container.* , service.*, namespace.*]
       logging:
         loglevel: debug
 
@@ -458,8 +433,9 @@ data:
       pipelines:
         metrics:
           receivers: [prometheus]
-          processors: [resourcedetection, metricstransform/insights, filter, cumulativetodelta, experimental_metricsgeneration, experimental_metricsgeneration/2, experimental_metricsgeneration/3, metricstransform/labelling, batch/metrics]
-          exporters: [logging, awsemf]
+          processors: [resourcedetection, metricstransform, filter, metricstransform/labelling, batch]
+          # processors: [resourcedetection, metricstransform/insights, filter, cumulativetodelta, experimental_metricsgeneration, experimental_metricsgeneration/2, experimental_metricsgeneration/3, metricstransform/labelling, batch/metrics]
+          exporters: [logging, awsemf]  
 ---
 # create adot-col service account and role binding
 apiVersion: v1
@@ -550,26 +526,15 @@ spec:
       securityContext:
         fsGroup: 65534
       containers:
-      - image: nginx:latest
-        name: nginx-far-100
-        resources:
-          limits:
-            cpu: 1
-            memory: 1Gi
-          requests:
-            cpu: 100m
-            memory: 200Mi
-      - command:
+      - image: rhossai2/otel-contrib:v0.0.13
+        name: adot-collector
+        command:
           - "/otelcontribcol"
           - "--config=/conf/adot-collector-config.yaml"
           - "--log-level=DEBUG"
-        image: rhossai2/otel-contrib:v0.0.6
-        name: contrib-collector-fargate
         env:
-          - name: AWS_REGION
-            value: "us-east-2"
-          - name: CLUSTER
-            value: "texas"
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "ClusterName=texas"
           - name: K8S_NODE_NAME
             valueFrom:
               fieldRef:
@@ -596,7 +561,7 @@ spec:
         ports:
         - containerPort: 8888  # Default endpoint for querying metrics.
         volumeMounts:
-        - name: adot-collector-config-vol
+        - name: adot-collector-config-volume
           mountPath: /conf
         livenessProbe:
           httpGet:
@@ -612,5 +577,5 @@ spec:
             items:
               - key: adot-collector-config
                 path: adot-collector-config.yaml
-          name: adot-collector-config-vol
+          name: adot-collector-config-volume
 ---
