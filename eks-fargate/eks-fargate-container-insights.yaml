@@ -64,18 +64,6 @@ data:
                 target_label: systemd_service_name
                 replacement: '$${1}'
     processors:
-      batch:
-        timeout: 60s
-      filter:
-        metrics:
-          include:
-            match_type: regexp
-            metric_names:
-              - new_container_.*
-              - pod_.*
-              - node_.*
-              - service_*
-              - namespace_*
       metricstransform:
         transforms:
           - include: container_spec_cpu_quota
@@ -290,8 +278,16 @@ data:
             action: insert
             match_type: strict
             experimental_match_labels: {"id": "/"}
-      resourcedetection:
-        detectors: [env, eks]
+      filter:
+        metrics:
+          include:
+            match_type: regexp
+            metric_names:
+              - new_container_.*
+              - pod_.*
+              - node_.*
+              - service_*
+              - namespace_*
       cumulativetodelta:
         metrics:
           - new_container_cpu_usage_seconds_total
@@ -414,6 +410,14 @@ data:
             match_type: regexp
             action: update
             new_name: container_$$1
+      resourcedetection:
+        detectors: [env, eks]
+      cumulativetodelta:
+        metrics:
+          - new_container_cpu_usage_seconds_total
+          - pod_cpu_usage_seconds_total
+      batch:
+        timeout: 60s
     exporters:
       awsemf:
         log_group_name: '/aws/containerinsights/{ClusterName}/performance/test-aug-22-01'
@@ -434,19 +438,15 @@ data:
 
     extensions:
       health_check:
-      pprof:
-        endpoint: :1888
-      zpages:
-        endpoint: :55679
 
     service:
-      extensions: [pprof, zpages, health_check]
       pipelines:
         metrics:
           receivers: [prometheus]
           processors: [resourcedetection, metricstransform, filter, metricstransform/labelling, batch]
-          # processors: [resourcedetection, metricstransform/insights, filter, cumulativetodelta, experimental_metricsgeneration, experimental_metricsgeneration/2, experimental_metricsgeneration/3, metricstransform/labelling, batch/metrics]
+          # processors: [resourcedetection, metricstransform/insights, filter, cumulativetodelta, experimental_metricsgeneration, experimental_metricsgeneration/2, experimental_metricsgeneration/3, metricstransform/labelling, batch]
           exporters: [logging, awsemf]  
+      extensions: [health_check]
 ---
 # create adot-col service account and role binding
 apiVersion: v1
