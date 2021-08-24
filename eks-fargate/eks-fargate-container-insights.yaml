@@ -341,49 +341,64 @@ data:
               - new_container_.*
               - pod_.*
 
+      # converts cumulative sum to delta 
       cumulativetodelta:
         metrics:
           - new_container_cpu_usage_seconds_total
           - pod_cpu_usage_seconds_total
+          - pod_memory_pgfault
+          - pod_memory_pgmajfault
+          - pod_memory_hierarchical_pgfault
+          - pod_memory_hierarchical_pgmajfault
+          - pod_network_rx_bytes
+          - pod_network_rx_dropped
+          - pod_network_rx_errors
+          - pod_network_rx_packets
+          - pod_network_tx_bytes
+          - pod_network_tx_dropped
+          - pod_network_tx_errors
+          - pod_network_tx_packets
+          - new_container_memory_pgfault
+          - new_container_memory_pgmajfault
+          - new_container_memory_hierarchical_pgfault
+          - new_container_memory_hierarchical_pgmajfault
 
-      experimental_metricsgeneration:
+      # converts cumulative delta to rate  
+      deltatorate:
+        metrics:
+          - new_container_cpu_usage_seconds_total
+          - pod_cpu_usage_seconds_total
+          - pod_memory_pgfault
+          - pod_memory_pgmajfault
+          - pod_memory_hierarchical_pgfault
+          - pod_memory_hierarchical_pgmajfault
+          - pod_network_rx_bytes
+          - pod_network_rx_dropped
+          - pod_network_rx_errors
+          - pod_network_rx_packets
+          - pod_network_tx_bytes
+          - pod_network_tx_dropped
+          - pod_network_tx_errors
+          - pod_network_tx_packets
+          - new_container_memory_pgfault
+          - new_container_memory_pgmajfault
+          - new_container_memory_hierarchical_pgfault
+          - new_container_memory_hierarchical_pgmajfault
+
+      experimental_metricsgeneration/1:
         rules:
           - name: pod_network_total_bytes
-            unit: Bytes
+            unit: Bytes/Second
             type: calculate
             metric1: pod_network_rx_bytes
             metric2: pod_network_tx_bytes
-            operation: percent
-          - name: pod_memory_utilization
-            unit: Percent
-            type: calculate
-            metric1: pod_memory_working_set
-            metric2: node_memory_limit
-            operation: percent
+            operation: add
           - name: pod_memory_utilization_over_pod_limit
             unit: Percent
             type: calculate
             metric1: pod_memory_working_set
             metric2: pod_memory_limit
             operation: percent  
-          - name: container_memory_utilization
-            unit: Percent
-            type: calculate
-            metric1: container_memory_working_set
-            metric2: node_memory_limit
-            operation: percent
-          - name: node_cpu_limit_vcpu
-            unit: vCpu
-            type: scale
-            metric1: node_cpu_limit
-            operation: multiply
-            scale_by: 1024
-          - name: pod_cpu_limit_vcpu
-            unit: vCpu
-            type: scale
-            metric1: pod_cpu_limit
-            operation: divide
-            scale_by: 100
           - name: pod_cpu_usage_total
             unit: Millicore
             type: scale
@@ -391,27 +406,30 @@ data:
             operation: multiply
             # core to millicore: multiply by 1000
             # millicore seconds to millicore nanoseconds: multiply by 10^9
-            scale_by: 1000000000000
-      experimental_metricsgeneration/2:
-        rules:
-          - name: pod_cpu_reserved_capacity
-            type: calculate
-            metric1: pod_cpu_request
-            metric2: node_cpu_limit_vcpu
-            operation: percent
+            scale_by: 1000
+          - name: pod_cpu_limit_vcpu
+            unit: vCpu
+            type: scale
+            metric1: pod_cpu_limit
+            operation: divide
+            scale_by: 100
           # - name: pod_cpu_usage_total
+          #   unit: Millicore
           #   type: scale
-          #   metric1: pod_cpu_usage_total_millicore
+          #   metric1: pod_cpu_usage_seconds_total
           #   operation: multiply
-          #   scale_by: 1000000000
+          #   # core to millicore: multiply by 1000
+          #   # millicore seconds to millicore nanoseconds: multiply by 10^9
+          #   scale_by: 1000000000000
+      # experimental_metricsgeneration/2:
+      #   rules:
+      #     - name: pod_cpu_usage_total
+      #       type: scale
+      #       metric1: pod_cpu_usage_total_millicore
+      #       operation: multiply
+      #       scale_by: 1000000000
       experimental_metricsgeneration/3:
         rules:
-          - name: pod_cpu_utilization
-            type: calculate
-            unit: Percent
-            metric1: pod_cpu_usage_total
-            metric2: node_cpu_limit_vcpu
-            operation: percent
           - name: pod_cpu_utilization_over_pod_limit
             type: calculate
             unit: Percent
@@ -455,20 +473,14 @@ data:
       resourcedetection:
         detectors: [env, eks]
 
-      # converts cumulative delta to rate  
-      cumulativetodelta:
-        metrics:
-          - new_container_cpu_usage_seconds_total
-          - pod_cpu_usage_seconds_total
-
       batch:
         timeout: 60s
 
     exporters:
       awsemf:
-        log_group_name: '/aws/containerinsights/{ClusterName}/performance/test-aug-24-01'
-        log_stream_name: '{PodName}-aug-24-01'
-        namespace: 'ContainerInsights-aug-24-01'
+        log_group_name: '/aws/containerinsights/{ClusterName}/performance/test-aug-24-02'
+        log_stream_name: '{PodName}-aug-24-02'
+        namespace: 'ContainerInsights-aug-24-02'
         region: us-east-2
         resource_to_telemetry_conversion:
           enabled: true
@@ -477,8 +489,14 @@ data:
         dimension_rollup_option: NoDimensionRollup
         metric_declarations:
           - dimensions: [ [ClusterName, LaunchType], [ClusterName, Namespace, LaunchType], [ClusterName, Namespace, PodName, LaunchType]]
-            metric_name_selectors: [ pod.* ]
-          - metric_name_selectors: [ container.*]
+            metric_name_selectors:
+              - pod_cpu_utilization_over_pod_limit
+              - pod_memory_utilization_over_pod_limit
+              - pod_memory_working_set
+              - pod_memory_limit
+              - pod_network_rx_bytes
+              - pod_network_tx_bytes
+
       logging:
         loglevel: debug
 
@@ -489,7 +507,7 @@ data:
       pipelines:
         metrics:
           receivers: [prometheus]
-          processors: [metricstransform/label_1, resourcedetection, metricstransform/rename, filter, metricstransform/label_2, batch]
+          processors: [metricstransform/label_1, resourcedetection, metricstransform/rename, filter, cumulativetodelta, deltatorate, experimental_metricsgeneration/1, experimental_metricsgeneration/3, metricstransform/label_2, batch]
           # processors: [resourcedetection, metricstransform/insights, filter, cumulativetodelta, experimental_metricsgeneration, experimental_metricsgeneration/2, experimental_metricsgeneration/3, metricstransform/labelling, batch]
           exporters: [logging, awsemf]  
       extensions: [health_check]
